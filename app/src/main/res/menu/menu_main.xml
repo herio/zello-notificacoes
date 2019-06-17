@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="br.gov.tcu.zello.MainActivity"
+    xmlns:br.gov.tcu.zello="http://schemas.android.com/apk/res-auto" >
+    <item
+        android:id="@+id/limpar_notificacoes"
+        android:orderInCategory="100"
+        br.gov.tcu.zello:showAsAction="ifRoom"
+        android:title="@string/limpar_notificacoes" />
+    <item
+        android:id="@+id/configuracoes"
+        android:orderInCategory="100"
+        br.gov.tcu.zello:showAsAction="ifRoom"
+        android:title="@string/configuracoes" />
+</menu>
