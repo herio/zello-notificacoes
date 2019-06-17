@@ -9,9 +9,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -56,13 +60,15 @@ public class MainActivity extends Activity {
         }
     }
 
-    private BroadcastReceiver onNotice = new BroadcastReceiver() {
+    private final BroadcastReceiver onNotice = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+
             String title = intent.getStringExtra("title");
             String pkg = intent.getStringExtra("package");
             String text = intent.getStringExtra("text");
+            Log.i("MainActivity", ">>> title: " + title + "; text: " + text);
 
             try {
                 byte[] byteArray = intent.getByteArrayExtra("icon");
@@ -85,11 +91,20 @@ public class MainActivity extends Activity {
                     adapter = new AppListaBaseAdapter(getApplicationContext(), notificacaoBeanList);
                     list = (ListView) findViewById(R.id.list);
                     list.setAdapter(adapter);
+
+                    list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                            Log.i("MainActivity", ">>> click: " + position);
+                            Toast.makeText(MainActivity.this, ">>> click: " + position, Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
 
-            } catch (Exception e) {
-                e.printStackTrace();
+                } catch(Exception e){
+                    e.printStackTrace();
+                }
             }
         }
-    };
-}
+
+        ;
+    }
