@@ -53,7 +53,11 @@ Atualizar código local mantendo suas atualizações
 	git stash
 	git pull
 	git stash pop
-	
+
+Ver log dos últimos commits:
+
+    git log --stat
+
 Fazer commit:
 
     git add . --add todas alterações
