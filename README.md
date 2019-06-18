@@ -4,20 +4,20 @@ Projeto android que escuta as notificações que chegam no dispositivo em que es
 
 ## Classes
 
-MainActivity
-- Classe principal
--  Método que trata as notificações:
-    Atributo da classe: BroadcastReceiver onNotice
-    Método: onReceive()
+- MainActivity
+ - Classe principal
+ -  Tratamento das notificações:
+  - Atributo da classe: BroadcastReceiver onNotice
+  - Método: onReceive()
 		
-AppNotificationListenerService
-- NotificationListenerService que escuta notificações do dispositivo e encaminha o que chega para a classe MainActivity que possui atributo (BroadcastReceiver onNotice) que recebe as notificações enviadas por esse serviço.
+- AppNotificationListenerService
+ - NotificationListenerService que escuta notificações do dispositivo e encaminha o que chega para a classe MainActivity que possui atributo (BroadcastReceiver onNotice) que recebe as notificações enviadas por esse serviço.
 
-AppBroadcastReceiver
-- BroadcastReceiver que escuta notificações de ligações ao dispositivo móvel
+- AppBroadcastReceiver
+ - BroadcastReceiver que escuta notificações de ligações ao dispositivo móvel
 
-SmsBroadcastReceiver
-- BroadcastReceiver que escuta notificações de SMS enviados ao dispositivo móvel
+- SmsBroadcastReceiver
+ - BroadcastReceiver que escuta notificações de SMS enviados ao dispositivo móvel
 	
 
 ## Pré-requisitos para rodar localmente
