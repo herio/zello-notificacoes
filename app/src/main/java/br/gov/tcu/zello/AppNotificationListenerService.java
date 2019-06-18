@@ -40,10 +40,8 @@ public class AppNotificationListenerService extends NotificationListenerService 
         int id1 = extras.getInt(Notification.EXTRA_SMALL_ICON);
         Bitmap id = sbn.getNotification().largeIcon;
 
-        Log.i("Package", pack);
-        Log.i("Ticker", ticker);
-        Log.i("Title", title);
-        Log.i("Text", text);
+        Log.i("AppNotificationListener",
+                String.format(">>> onNotificationPosted() Title[%s] Text[%s] Package[%s] Ticker[%s]", title, text, pack, ticker));
 
         Intent msgrcv = new Intent("Msg");
         msgrcv.putExtra("package", pack);
@@ -61,6 +59,6 @@ public class AppNotificationListenerService extends NotificationListenerService 
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
-        Log.i("Msg", "Notification Removed");
+        Log.i("AppNotificationListener", ">>> onNotificationRemoved()");
     }
 }

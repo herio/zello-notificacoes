@@ -12,4 +12,9 @@
         android:orderInCategory="100"
         br.gov.tcu.zello:showAsAction="ifRoom"
         android:title="@string/configuracoes" />
+    <item
+        android:id="@+id/sair"
+        android:orderInCategory="100"
+        br.gov.tcu.zello:showAsAction="ifRoom"
+        android:title="@string/sair" />
 </menu>

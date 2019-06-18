@@ -27,13 +27,9 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     String senderNum = phoneNumber;
                     String message = currentMessage.getDisplayMessageBody();
 
-                    Log.i("SmsReceiver", "senderNum: " + senderNum + "; message: " + message);
+                    Log.i("SmsBroadcastReceiver",
+                            String.format(">>> onReceive() senderNum[%s] message[%s]", senderNum, message));
 
-                    // Show Alert
-                    int duration = Toast.LENGTH_LONG;
-//                    Toast toast = Toast.makeText(context,
-//                            "senderNum: "+ senderNum + ", message: " + message, duration);
-                 //   toast.show();
                     Intent msgrcv = new Intent("Msg");
                     msgrcv.putExtra("package", "");
                     msgrcv.putExtra("ticker", senderNum);
@@ -44,7 +40,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
             } // bundle is null
 
         } catch (Exception e) {
-            Log.e("SmsReceiver", "Exception smsReceiver" +e);
+            Log.e("SmsReceiver", ">>> Exception " + e);
         }
     }
 }

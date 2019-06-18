@@ -55,6 +55,9 @@ public class MainActivity extends Activity {
                 notificacaoBeanList.clear();
                 adapter.notifyDataSetChanged();
                 return true;
+            case R.id.sair:
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(1);
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -68,7 +71,8 @@ public class MainActivity extends Activity {
             String title = intent.getStringExtra("title");
             String pkg = intent.getStringExtra("package");
             String text = intent.getStringExtra("text");
-            Log.i("MainActivity", ">>> title: " + title + "; text: " + text);
+            Log.i("MainActivity",
+                    String.format(">>> onReceive() title[%s], text[%s] pkg[%s]: ", title, text, pkg));
 
             try {
                 byte[] byteArray = intent.getByteArrayExtra("icon");
@@ -91,20 +95,10 @@ public class MainActivity extends Activity {
                     adapter = new AppListaBaseAdapter(getApplicationContext(), notificacaoBeanList);
                     list = (ListView) findViewById(R.id.list);
                     list.setAdapter(adapter);
-
-                    list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                            Log.i("MainActivity", ">>> click: " + position);
-                            Toast.makeText(MainActivity.this, ">>> click: " + position, Toast.LENGTH_SHORT).show();
-                        }
-                    });
                 }
-
-                } catch(Exception e){
-                    e.printStackTrace();
-                }
+            } catch(Exception e){
+                e.printStackTrace();
             }
         }
-
-        ;
-    }
+    };
+}

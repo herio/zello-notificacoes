@@ -2,16 +2,18 @@ package br.gov.tcu.zello;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class AppListaBaseAdapter extends BaseAdapter {
+public class AppListaBaseAdapter extends BaseAdapter implements View.OnClickListener{
 
     private Context context;
     private ArrayList<NotificacaoBean> notificacaoBeanList;
@@ -36,10 +38,12 @@ public class AppListaBaseAdapter extends BaseAdapter {
         return position;
     }
 
-    public View getView(int position,View view,ViewGroup parent) {
-        LayoutInflater inflater=(LayoutInflater) context
+    public View getView(int position, View view, ViewGroup parent) {
+        LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-        View rowView=inflater.inflate(R.layout.list_item, null,true);
+        View rowView = inflater.inflate(R.layout.list_item, null, true);
+        rowView.setOnClickListener(this);
+        rowView.setTag(String.valueOf(position));
 
         TextView txtTitle = (TextView) rowView.findViewById(R.id.Itemtitle);
         TextView txtText = (TextView) rowView.findViewById(R.id.Itemtext);
@@ -47,7 +51,7 @@ public class AppListaBaseAdapter extends BaseAdapter {
         ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
 
         NotificacaoBean m = notificacaoBeanList.get(position);
-        if(m != null) {
+        if (m != null) {
             txtTitle.setText(m.getTitle());
             txtText.setText(m.getText());
             txtPkg.setText(m.getPkg());
@@ -57,5 +61,13 @@ public class AppListaBaseAdapter extends BaseAdapter {
         }
         return rowView;
 
-    };
+    }
+
+    public void onClick(View v) {
+        int pos = Integer.parseInt(v.getTag().toString());
+        Log.i("AppListaBaseAdapter", String.format(">>> onClick() Removendo notificação pos[%s]", pos));
+        Toast.makeText(context,String.format("Removendo notificação pos[%s] ", pos),Toast.LENGTH_LONG).show();
+        notificacaoBeanList.remove(pos);
+        notifyDataSetChanged();
+    }
 }

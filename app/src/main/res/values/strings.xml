@@ -4,5 +4,6 @@
     <string name="app_name">Zello Notificações</string>
     <string name="limpar_notificacoes">Limpar Notificações</string>
     <string name="configuracoes">Configurações</string>
+    <string name="sair">Sair</string>
 
 </resources>
