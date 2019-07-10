@@ -25,8 +25,7 @@ public class AppBroadcastReceiver extends BroadcastReceiver {
                 msgrcv.putExtra("title", incomingNumber);
                 msgrcv.putExtra("text", "");
 
-                Log.i("AppBroadcastReceiver",
-                        String.format(">>> onReceive() title[%s]", incomingNumber));
+                Log.i("AppBroadcastReceiver", String.format(">>> onReceive() title[%s]", incomingNumber));
 
                 LocalBroadcastManager.getInstance(context).sendBroadcast(msgrcv);
             }
