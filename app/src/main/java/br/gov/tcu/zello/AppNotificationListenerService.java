@@ -1,29 +1,18 @@
 package br.gov.tcu.zello;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.support.v4.content.LocalBroadcastManager;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 
 
 public class AppNotificationListenerService extends NotificationListenerService {
@@ -37,7 +26,7 @@ public class AppNotificationListenerService extends NotificationListenerService 
     }
 
     @Override
-    public void onNotificationPosted(StatusBarNotification sbn) {
+    public void onNotificationPosted(final StatusBarNotification sbn) {
         String pack = sbn.getPackageName();
         String ticker = "";
         if (sbn.getNotification().tickerText != null) {
@@ -61,6 +50,7 @@ public class AppNotificationListenerService extends NotificationListenerService 
         msgrcv.putExtra("ticker", ticker);
         msgrcv.putExtra("title", title);
         msgrcv.putExtra("text", text);
+        msgrcv.putExtra("actions", sbn.getNotification().actions);
         if (id != null) {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             id.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -69,57 +59,100 @@ public class AppNotificationListenerService extends NotificationListenerService 
         }
 
         if(pack.equals("com.whatsapp")) {
-            AsyncTask.execute(new Runnable() {
-                @Override
-                public void run() {
-                    System.out.println(">>>Vai chamar zello " + text);
-                    try {
-                        StringBuilder sb = new StringBuilder();
-                        URL url;
-                        HttpURLConnection urlConn;
-                        DataOutputStream printout;
-                        DataInputStream input;
-                        url = new URL ("https://chatbot.apps.tcu.gov.br/rasa/webhooks/whatsapp/webhook");
-                        urlConn = (HttpURLConnection) url.openConnection();
-                        urlConn.setDoInput (true);
-                        urlConn.setDoOutput (true);
-                        urlConn.setUseCaches (false);
-                        urlConn.setRequestProperty("Content-Type","application/json");
-                        urlConn.connect();
-                        JSONObject jsonParam = new JSONObject();
-                        jsonParam.put("sender", "61981656123");
-                        jsonParam.put("message", text);
-                        printout = new DataOutputStream(urlConn.getOutputStream ());
-                        printout.writeBytes(URLEncoder.encode(jsonParam.toString(),"UTF-8"));
-                        printout.flush ();
-                        printout.close ();
-                        OutputStreamWriter out = new OutputStreamWriter(urlConn.getOutputStream());
-                        out.write(jsonParam.toString());
-                        out.close();
-
-                        if(urlConn.getResponseCode() == HttpURLConnection.HTTP_OK){
-                            BufferedReader br = new BufferedReader(new InputStreamReader(urlConn.getInputStream(),"utf-8"));
-                            String line = null;
-                            while ((line = br.readLine()) != null) {
-                                sb.append(line + "\n");
-                            }
-                            br.close();
-                            System.out.println(">>>" + sb.toString());
-                        }else{
-                            System.out.println(">>>" + urlConn.getResponseMessage());
-                        }
-                    } catch (IOException | JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
+            enviaRespostasWhatsApp(sbn, title, text);
         }
 
         LocalBroadcastManager.getInstance(context).sendBroadcast(msgrcv);
     }
 
+    private void enviaRespostasWhatsApp(final StatusBarNotification sbn, String title, String text) {
+        Log.i("AppNotificationListener", String.format("### enviaRespostasWhatsApp() title[%s], text[%s]", title, text));
+        new ReplyIntentSender(sbn, title, text).sendNativeIntent();
+//        new AlertDialog.Builder(context)
+//                .setTitle("Notificação é do WhatsApp")
+//                .setMessage(String.format("### enviaRespostasWhatsApp() title[%s], text[%s]", title, text))
+//                .setPositiveButton(android.R.string.yes, new DialogEnviaResposta(sbn, title, text))
+//                .setNegativeButton(android.R.string.no, null)
+//                .setIcon(android.R.drawable.ic_dialog_alert)
+//                .show();
+    }
+
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         Log.i("AppNotificationListener", ">>> onNotificationRemoved()");
+    }
+
+//    class DialogEnviaResposta implements DialogInterface.OnClickListener {
+//        private StatusBarNotification sbn;
+//        private String title;
+//        private String text;
+//
+//        public DialogEnviaResposta(StatusBarNotification sbn, String title, String text) {
+//            this.sbn = sbn;
+//            this.title = title;
+//            this.text = text;
+//        }
+//
+//        public void onClick(DialogInterface dialog, int which) {
+//            Log.i("AppNotificationListener", String.format("### DialogEnviaResposta.onClick() title[%s], text[%s]", title, text));
+//            new ReplyIntentSender(sbn, title, text).sendNativeIntent();
+//        }
+//    }
+
+    class ReplyIntentSender {
+        private StatusBarNotification sbn;
+        private String title;
+        private String text;
+
+        public ReplyIntentSender(StatusBarNotification sbn, String title, String text) {
+            this.sbn = sbn;
+            this.title = title;
+            this.text = text;
+        }
+
+        private boolean sendNativeIntent() {
+            Log.i("AppNotificationListener", String.format("### ReplyIntentSender.sendNativeIntent() title[%s], text[%s]", title, text));
+            String nomeAcaoResposta = "Resp.";
+            Notification.Action action = recuperaActionResposta(sbn, nomeAcaoResposta);
+            if(action == null) {
+                Log.i("AppNotificationListener", "### ReplyIntentSender.sendNativeIntent() action == null");
+            } else {
+                if (!title.equalsIgnoreCase("Você")) {
+                    String respostaAutomatica = String.format("Olá, essa é uma resposta automática do Zello TCU title[%s], text[%s]", title, text);
+                    Log.i("AppNotificationListener", String.format("### ReplyIntentSender.sendNativeIntent() action != null respostaAutomatica[%s]", respostaAutomatica));
+                    android.app.RemoteInput rem = action.getRemoteInputs()[0];
+                    Intent intent = new Intent();
+                    Bundle bundle = new Bundle();
+                    bundle.putCharSequence(rem.getResultKey(), respostaAutomatica);
+                    android.app.RemoteInput.addResultsToIntent(action.getRemoteInputs(), intent, bundle);
+                    try {
+                        cancelNotification(sbn.getKey());
+                        action.actionIntent.send(context, 0, intent);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return false;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private Notification.Action recuperaActionResposta(StatusBarNotification sbn, String name) {
+            Log.i("AppNotificationListener", String.format("### ReplyIntentSender.recuperaActionResposta() actions[%s]", sbn.getNotification().actions));
+            Notification.Action[] actions = sbn.getNotification().actions;
+            if(actions != null) {
+                for (Notification.Action act : actions) {
+                    if (act != null && act.getRemoteInputs() != null) {
+                        if (act.title.toString().contains(name)) {
+                            if (act.getRemoteInputs() != null)
+                                return act;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
     }
 }

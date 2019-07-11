@@ -1,47 +1,24 @@
 package br.gov.tcu.zello;
 
 import android.app.Activity;
-import android.app.DownloadManager;
+import android.app.AlertDialog;
+import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.service.notification.StatusBarNotification;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import com.google.android.gms.common.api.Response;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.ArrayList;
-
-import javax.net.ssl.HttpsURLConnection;
 
 
 public class MainActivity extends Activity {
@@ -54,9 +31,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        notificacaoBeanList = new ArrayList<NotificacaoBean>();
+        notificacaoBeanList = new ArrayList<>();
         adapter = new AppListaBaseAdapter(getApplicationContext(), notificacaoBeanList);
-        list = (ListView) findViewById(R.id.list);
+        list = findViewById(R.id.list);
         list.setAdapter(adapter);
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Msg"));
     }
@@ -87,16 +64,29 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void enviaRespostasWhatsApp(final Notification.Action[] actions, String title, String text) {
+        Log.i("AppNotificationListener", String.format("### enviaRespostasWhatsApp() title[%s], text[%s]", title, text));
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Notificação é do WhatsApp")
+                .setMessage(String.format("### enviaRespostasWhatsApp() title[%s], text[%s]", title, text))
+                .setPositiveButton(android.R.string.yes, new DialogEnviaResposta(actions, title, text))
+                .setNegativeButton(android.R.string.no, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
     private final BroadcastReceiver onNotice = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
 
             final String title = intent.getStringExtra("title");
-            final String pkg = intent.getStringExtra("package");
+            final String pack = intent.getStringExtra("package");
             final String text = intent.getStringExtra("text");
+            //final Notification.Action[] actions = intent.getParcelableExtra("actions");
+
             Log.i("MainActivity",
-                    String.format(">>> onReceive() title[%s], text[%s] pkg[%s]: ", title, text, pkg));
+                    String.format(">>> onReceive() title[%s], text[%s] pkg[%s]: ", title, text, pack));
 
             try {
                 byte[] byteArray = intent.getByteArrayExtra("icon");
@@ -107,7 +97,7 @@ public class MainActivity extends Activity {
                 NotificacaoBean notificacaoBean = new NotificacaoBean();
                 notificacaoBean.setTitle(title);
                 notificacaoBean.setText(text);
-                notificacaoBean.setPkg(pkg);
+                notificacaoBean.setPkg(pack);
                 notificacaoBean.setImage(bmp);
 
                 if (notificacaoBeanList != null) {
@@ -121,21 +111,84 @@ public class MainActivity extends Activity {
                     list.setAdapter(adapter);
                 }
 
-//                try {
-//                    PackageManager packageManager = context.getPackageManager();
-//                    Intent i = new Intent(Intent.ACTION_VIEW);
-//                    String url = "https://api.whatsapp.com/send?phone=61993974601&text=" + URLEncoder.encode(text, "UTF-8");
-//                    i.setPackage("com.whatsapp");
-//                    i.setData(Uri.parse(url));
-//                    if (i.resolveActivity(packageManager) != null) {
-//                        context.startActivity(i);
-//                    }
-//                } catch (Exception e){
-//                    e.printStackTrace();
-//                }
+//            if(pack.equals("com.whatsapp")) {
+//                enviaRespostasWhatsApp(actions, title, text);
+//            }
+
             } catch(Exception e){
                 e.printStackTrace();
             }
         }
+
     };
+
+    class DialogEnviaResposta implements DialogInterface.OnClickListener {
+        private final Notification.Action[] actions;
+        private String title;
+        private String text;
+
+        public DialogEnviaResposta(final Notification.Action[] actions, String title, String text) {
+            this.actions = actions;
+            this.title = title;
+            this.text = text;
+        }
+
+        public void onClick(DialogInterface dialog, int which) {
+            Log.i("AppNotificationListener", String.format("### DialogEnviaResposta.onClick() title[%s], text[%s]", title, text));
+            new ReplyIntentSender(actions, title, text).sendNativeIntent();
+        }
+    }
+
+    class ReplyIntentSender {
+        private Notification.Action[] actions;
+        private String title;
+        private String text;
+
+        public ReplyIntentSender(Notification.Action[] actions, String title, String text) {
+            this.actions = actions;
+            this.title = title;
+            this.text = text;
+        }
+
+        private boolean sendNativeIntent() {
+            Log.i("AppNotificationListener", String.format("### ReplyIntentSender.sendNativeIntent() title[%s], text[%s]", title, text));
+            String nomeAcaoResposta = "Resp.";
+            Notification.Action action = recuperaActionResposta(actions, nomeAcaoResposta);
+            if(action == null) {
+                Log.i("AppNotificationListener", "### ReplyIntentSender.sendNativeIntent() action == null");
+            } else {
+                String respostaAutomatica =  String.format("Olá, essa é uma resposta automática do Zello TCU title[%s], text[%s]", title, text);
+                Log.i("AppNotificationListener", String.format("### ReplyIntentSender.sendNativeIntent() action != null respostaAutomatica[%s]", respostaAutomatica));
+                for (android.app.RemoteInput rem : action.getRemoteInputs()) {
+                    Intent intent = new Intent();
+                    Bundle bundle = new Bundle();
+                    bundle.putCharSequence(rem.getResultKey(), respostaAutomatica);
+                    android.app.RemoteInput.addResultsToIntent(action.getRemoteInputs(), intent, bundle);
+                    try {
+                        action.actionIntent.send(MainActivity.this, 0, intent);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return false;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private Notification.Action recuperaActionResposta(Notification.Action[] actions, String name) {
+            if(actions != null) {
+                for (Notification.Action act : actions) {
+                    if (act != null && act.getRemoteInputs() != null) {
+                        if (act.title.toString().contains(name)) {
+                            if (act.getRemoteInputs() != null)
+                                return act;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+    }
 }
