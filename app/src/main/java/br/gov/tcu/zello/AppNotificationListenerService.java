@@ -26,6 +26,11 @@ public class AppNotificationListenerService extends NotificationListenerService 
     }
 
     @Override
+    public void onNotificationRemoved(StatusBarNotification sbn) {
+        Log.i("AppNotificationListener", ">>> onNotificationRemoved()");
+    }
+
+    @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
         String pack = sbn.getPackageName();
         String ticker = "";
@@ -68,36 +73,7 @@ public class AppNotificationListenerService extends NotificationListenerService 
     private void enviaRespostasWhatsApp(final StatusBarNotification sbn, String title, String text) {
         Log.i("AppNotificationListener", String.format("### enviaRespostasWhatsApp() title[%s], text[%s]", title, text));
         new ReplyIntentSender(sbn, title, text).sendNativeIntent();
-//        new AlertDialog.Builder(context)
-//                .setTitle("Notificação é do WhatsApp")
-//                .setMessage(String.format("### enviaRespostasWhatsApp() title[%s], text[%s]", title, text))
-//                .setPositiveButton(android.R.string.yes, new DialogEnviaResposta(sbn, title, text))
-//                .setNegativeButton(android.R.string.no, null)
-//                .setIcon(android.R.drawable.ic_dialog_alert)
-//                .show();
     }
-
-    @Override
-    public void onNotificationRemoved(StatusBarNotification sbn) {
-        Log.i("AppNotificationListener", ">>> onNotificationRemoved()");
-    }
-
-//    class DialogEnviaResposta implements DialogInterface.OnClickListener {
-//        private StatusBarNotification sbn;
-//        private String title;
-//        private String text;
-//
-//        public DialogEnviaResposta(StatusBarNotification sbn, String title, String text) {
-//            this.sbn = sbn;
-//            this.title = title;
-//            this.text = text;
-//        }
-//
-//        public void onClick(DialogInterface dialog, int which) {
-//            Log.i("AppNotificationListener", String.format("### DialogEnviaResposta.onClick() title[%s], text[%s]", title, text));
-//            new ReplyIntentSender(sbn, title, text).sendNativeIntent();
-//        }
-//    }
 
     class ReplyIntentSender {
         private StatusBarNotification sbn;
@@ -153,6 +129,5 @@ public class AppNotificationListenerService extends NotificationListenerService 
             }
             return null;
         }
-
     }
 }
