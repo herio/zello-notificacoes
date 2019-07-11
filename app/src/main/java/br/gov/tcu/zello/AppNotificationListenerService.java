@@ -94,7 +94,7 @@ public class AppNotificationListenerService extends NotificationListenerService 
                 Log.i("AppNotificationListener", "### ReplyIntentSender.sendNativeIntent() action == null");
             } else {
                 if (!title.equalsIgnoreCase("Você")) {
-                    String respostaAutomatica = String.format("Olá, essa é uma resposta automática do Zello TCU title[%s], text[%s]", title, text);
+                    String respostaAutomatica = "Olá, essa é uma resposta automática do Zello TCU, logo logo Hério Thiago irá ver a notificação e irá te responder";
                     Log.i("AppNotificationListener", String.format("### ReplyIntentSender.sendNativeIntent() action != null respostaAutomatica[%s]", respostaAutomatica));
                     android.app.RemoteInput rem = action.getRemoteInputs()[0];
                     Intent intent = new Intent();

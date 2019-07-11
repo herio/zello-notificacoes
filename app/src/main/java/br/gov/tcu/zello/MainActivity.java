@@ -69,8 +69,7 @@ public class MainActivity extends Activity {
             final String pack = intent.getStringExtra("package");
             final String text = intent.getStringExtra("text");
 
-            Log.i("MainActivity",
-                    String.format(">>> onReceive() title[%s], text[%s] pkg[%s]: ", title, text, pack));
+            Log.i("MainActivity", String.format(">>> onReceive() title[%s], text[%s] pkg[%s]: ", title, text, pack));
 
             try {
                 byte[] byteArray = intent.getByteArrayExtra("icon");
