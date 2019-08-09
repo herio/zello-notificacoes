@@ -20,14 +20,14 @@ public class ReplyIntentSender {
     public void recuperaRespostaAutomatica(String title, String text) {
         Log.i("ReplyIntentSender", String.format("### recuperaRespostaAutomatica() title[%s], text[%s]", title, text));
         if (!title.contains("WhatsApp") && !title.contains("Você") && !title.contains("You") && !title.contains(":")) {
-            logNoApp("recuperaRespostaAutomatica", "Vai chamar ZelloClient");
+            logNoApp("recuperaRespostaAutomatica", String.format("Vai chamar ZelloClient title[%s], text[%s]", title, text));
             new ZelloClient(this).execute(title, text);
         }
     }
 
     public void recuperouRespostaAutomatica(String resposta) {
         Log.i("ReplyIntentSender", String.format("### recuperouRespostaAutomatica() resposta[%s]", resposta));
-        logNoApp("recuperouRespostaAutomatica", "Recebeu resposta do ZelloClient " + resposta);
+        logNoApp("recuperouRespostaAutomatica", String.format("Recebeu resposta do ZelloClient resposta[%s]", resposta));
         if(resposta != null) {
             Notification.Action action = findActionResponse(sbn);
             if (action == null) {
@@ -52,17 +52,18 @@ public class ReplyIntentSender {
 
     private Notification.Action findActionResponse(StatusBarNotification sbn) {
         Log.i("ReplyIntentSender", String.format("### findActionResponse() actions[%s]", sbn.getNotification().actions));
-        logNoApp("findActionResponse", sbn.getNotification().actions.toString());
         Notification.Action[] actions = sbn.getNotification().actions;
         if(actions != null) {
             for (Notification.Action act : actions) {
                 if (act != null && act.getRemoteInputs() != null) {
                     if (act.title.toString().contains("RESP") || act.title.toString().contains("REPLY")) {
+                        logNoApp("findActionResponse", String.format("Encontrou action[%s]", act.title.toString()));
                         return act;
                     }
                 }
             }
         }
+        logNoApp("findActionResponse", "Não encontrou action");
         return null;
     }
 
