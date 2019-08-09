@@ -8,7 +8,6 @@ buildscript {
         jcenter()
         maven { url 'http://artifactory.cpic.tcu.gov.br/artifactory/libs-release' }
         maven { url 'http://artifactory.cpic.tcu.gov.br/artifactory/libs-snapshot' }
-
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.1'
