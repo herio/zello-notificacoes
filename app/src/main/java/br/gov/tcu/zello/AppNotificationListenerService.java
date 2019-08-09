@@ -47,22 +47,21 @@ public class AppNotificationListenerService extends NotificationListenerService 
         Log.i("AppNotificationListener",
                 String.format(">>> onNotificationPosted() Title[%s] Text[%s] Package[%s] Ticker[%s]", title, text, pack, ticker));
 
-        if(pack.equals("com.whatsapp")) {
+        Intent msgrcv = new Intent("Msg");
+        msgrcv.putExtra("package", pack);
+        msgrcv.putExtra("ticker", ticker);
+        msgrcv.putExtra("title", title);
+        msgrcv.putExtra("text", text);
+        msgrcv.putExtra("actions", sbn.getNotification().actions);
+        if (id != null) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            id.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            msgrcv.putExtra("icon", byteArray);
+        }
+        LocalBroadcastManager.getInstance(context).sendBroadcast(msgrcv);
 
-            Intent msgrcv = new Intent("Msg");
-            msgrcv.putExtra("package", pack);
-            msgrcv.putExtra("ticker", ticker);
-            msgrcv.putExtra("title", title);
-            msgrcv.putExtra("text", text);
-            msgrcv.putExtra("actions", sbn.getNotification().actions);
-            if (id != null) {
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                id.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                byte[] byteArray = stream.toByteArray();
-                msgrcv.putExtra("icon", byteArray);
-            }
-            LocalBroadcastManager.getInstance(context).sendBroadcast(msgrcv);
-
+        if(pack.contains("whatsapp")) {
             Log.i("AppNotificationListener", String.format(">>> Vai responder pack[%s] title[%s], text[%s]", pack, title, text));
             new ReplyIntentSender(sbn, context).recuperaRespostaAutomatica(title, text);
             cancelNotification(sbn.getKey());
