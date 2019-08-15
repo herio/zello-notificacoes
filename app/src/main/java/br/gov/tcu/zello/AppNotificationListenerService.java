@@ -1,6 +1,5 @@
 package br.gov.tcu.zello;
 
-import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -31,21 +30,22 @@ public class AppNotificationListenerService extends NotificationListenerService 
     @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
         String pack = sbn.getPackageName();
+        Bundle extras = sbn.getNotification().extras;
+
+        String title = extras.getString("android.title");
         String ticker = "";
         if (sbn.getNotification().tickerText != null) {
             ticker = sbn.getNotification().tickerText.toString();
         }
-        Bundle extras = sbn.getNotification().extras;
-        String title = extras.getString("android.title");
+
         Object data = extras.get("android.bigText");
         if (data == null) {
             data = extras.get("android.text");
         }
-        final String text = data == null ? "" : data.toString();
-        Bitmap id = sbn.getNotification().largeIcon;
 
-        Log.i("AppNotificationListener",
-                String.format(">>> onNotificationPosted() Title[%s] Text[%s] Package[%s] Ticker[%s]", title, text, pack, ticker));
+        final String text = data == null ? "" : data.toString();
+
+        Bitmap id = sbn.getNotification().largeIcon;
 
         Intent msgrcv = new Intent("Msg");
         msgrcv.putExtra("package", pack);
@@ -53,6 +53,7 @@ public class AppNotificationListenerService extends NotificationListenerService 
         msgrcv.putExtra("title", title);
         msgrcv.putExtra("text", text);
         msgrcv.putExtra("actions", sbn.getNotification().actions);
+
         if (id != null) {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             id.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -61,9 +62,11 @@ public class AppNotificationListenerService extends NotificationListenerService 
         }
         LocalBroadcastManager.getInstance(context).sendBroadcast(msgrcv);
 
-        if(pack.contains("whatsapp")) {
-            Log.i("AppNotificationListener", String.format(">>> Vai responder pack[%s] title[%s], text[%s]", pack, title, text));
-            new ReplyIntentSender(sbn, context).recuperaRespostaAutomatica(title, text);
+        if (pack.contains("whatsapp")) {
+            if (title != null) {
+                Log.i("AppNotificationListener", String.format(">>> Vai responder pack[%s] title[%s], text[%s]", pack, title, text));
+                new ReplyIntentSender(sbn, context).recuperaRespostaAutomatica(title, text);
+            }
             cancelNotification(sbn.getKey());
         }
     }

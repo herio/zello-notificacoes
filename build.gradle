@@ -10,6 +10,7 @@ buildscript {
         maven { url 'http://artifactory.cpic.tcu.gov.br/artifactory/libs-snapshot' }
     }
     dependencies {
+        //noinspection GradleDependency
         classpath 'com.android.tools.build:gradle:3.4.1'
 
         // NOTE: Do not place your application dependencies here; they belong

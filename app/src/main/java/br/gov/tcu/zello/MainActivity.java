@@ -69,8 +69,6 @@ public class MainActivity extends Activity {
             final String pack = intent.getStringExtra("package");
             final String text = intent.getStringExtra("text");
 
-            Log.i("MainActivity", String.format(">>> onReceive() title[%s], text[%s] pkg[%s]: ", title, text, pack));
-
             try {
                 byte[] byteArray = intent.getByteArrayExtra("icon");
                 Bitmap bmp = null;
@@ -87,14 +85,14 @@ public class MainActivity extends Activity {
                     notificacaoBeanList.add(notificacaoBean);
                     adapter.notifyDataSetChanged();
                 } else {
-                    notificacaoBeanList = new ArrayList<NotificacaoBean>();
+                    notificacaoBeanList = new ArrayList<>();
                     notificacaoBeanList.add(notificacaoBean);
                     adapter = new AppListaBaseAdapter(getApplicationContext(), notificacaoBeanList);
-                    list = (ListView) findViewById(R.id.list);
+                    list = findViewById(R.id.list);
                     list.setAdapter(adapter);
                 }
 
-            } catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
