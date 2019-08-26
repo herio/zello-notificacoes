@@ -10,6 +10,9 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class ZelloClient extends AsyncTask<String, Void, String> {
     private ReplyIntentSender replyIntentSender;
@@ -23,6 +26,7 @@ public class ZelloClient extends AsyncTask<String, Void, String> {
         Log.i("ZelloClient", String.format("### doInBackground params0[%s] params1[%s]", params[0], params[1]));
         HttpURLConnection urlConnection = null;
         try {
+            List<String> list = new ArrayList<>();
             URL url = new URL("https://chatbot.apps.tcu.gov.br/rasa/webhooks/whatsapp/webhook");
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("POST");
@@ -34,12 +38,18 @@ public class ZelloClient extends AsyncTask<String, Void, String> {
 
             InputStream inputStream = urlConnection.getInputStream();
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readTree(inputStream);
-            String resposta = jsonNode.get(0).get("text").textValue();
+            JsonNode jsonNode = mapper.readTree(inputStream).get("text");
 
-            if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                return resposta;
+            if (jsonNode.isArray()) {
+                for (final JsonNode objNode : jsonNode) {
+                    list.add(objNode.textValue());
+                }
             }
+
+            String separator = Objects.requireNonNull(System.getProperty("line.separator"))
+                    .concat(Objects.requireNonNull(System.getProperty("line.separator")));
+
+            return String.join(separator, list);
 
         } catch (Exception e) {
             e.printStackTrace();
