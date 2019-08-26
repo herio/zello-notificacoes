@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 
+import java.util.List;
+
 import static android.app.RemoteInput.addResultsToIntent;
 
 class ReplyIntentSender {
@@ -23,19 +25,22 @@ class ReplyIntentSender {
         }
     }
 
-    void recuperouRespostaAutomatica(String resposta) {
-        if (resposta != null) {
+    void recuperouRespostaAutomatica(List<String> respostas) {
+        if (respostas != null) {
             Notification.Action action = findActionResponse(sbn);
             if (action != null) {
                 android.app.RemoteInput rem = action.getRemoteInputs()[0];
-                Intent intent = new Intent();
-                Bundle bundle = new Bundle();
-                bundle.putCharSequence(rem.getResultKey(), resposta);
-                addResultsToIntent(action.getRemoteInputs(), intent, bundle);
-                try {
-                    action.actionIntent.send(context, 0, intent);
-                } catch (Exception e) {
-                    e.printStackTrace();
+
+                for (String resposta: respostas) {
+                    Intent intent = new Intent();
+                    Bundle bundle = new Bundle();
+                    bundle.putCharSequence(rem.getResultKey(), resposta);
+                    addResultsToIntent(action.getRemoteInputs(), intent, bundle);
+                    try {
+                        action.actionIntent.send(context, 0, intent);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

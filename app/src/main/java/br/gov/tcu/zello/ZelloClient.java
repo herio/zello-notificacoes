@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ZelloClient extends AsyncTask<String, Void, String> {
+public class ZelloClient extends AsyncTask<String, Void, List<String>> {
     private ReplyIntentSender replyIntentSender;
 
     ZelloClient(ReplyIntentSender replyIntentSender) {
@@ -22,7 +22,7 @@ public class ZelloClient extends AsyncTask<String, Void, String> {
     }
 
     @Override
-    protected String doInBackground(String... params) {
+    protected List<String> doInBackground(String... params) {
         Log.i("ZelloClient", String.format("### doInBackground params0[%s] params1[%s]", params[0], params[1]));
         HttpURLConnection urlConnection = null;
         try {
@@ -46,10 +46,7 @@ public class ZelloClient extends AsyncTask<String, Void, String> {
                 }
             }
 
-            String separator = Objects.requireNonNull(System.getProperty("line.separator"))
-                    .concat(Objects.requireNonNull(System.getProperty("line.separator")));
-
-            return String.join(separator, list);
+            return list;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -71,7 +68,7 @@ public class ZelloClient extends AsyncTask<String, Void, String> {
     }
 
     @Override
-    protected void onPostExecute(String resposta) {
+    protected void onPostExecute(List<String> resposta) {
         if (replyIntentSender != null) {
             replyIntentSender.recuperouRespostaAutomatica(resposta);
         }
