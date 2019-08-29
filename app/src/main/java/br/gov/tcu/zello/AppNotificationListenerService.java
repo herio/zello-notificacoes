@@ -30,6 +30,7 @@ public class AppNotificationListenerService extends NotificationListenerService 
     @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
         String pack = sbn.getPackageName();
+        String tag = sbn.getTag();
         Bundle extras = sbn.getNotification().extras;
 
         String title = extras.getString("android.title");
@@ -46,6 +47,7 @@ public class AppNotificationListenerService extends NotificationListenerService 
         final String text = data == null ? "" : data.toString();
 
         Bitmap id = sbn.getNotification().largeIcon;
+        Log.i("NOTIFICATION-SBN", String.format(">>>>>>> sbn[%s]", sbn.toString()));
 
         Intent msgrcv = new Intent("Msg");
         msgrcv.putExtra("package", pack);
@@ -62,7 +64,7 @@ public class AppNotificationListenerService extends NotificationListenerService 
         }
         LocalBroadcastManager.getInstance(context).sendBroadcast(msgrcv);
 
-        if (pack.contains("whatsapp")) {
+        if (pack.replaceAll("[^A-Za-z]+", "").toUpperCase().contains("WHATSAPP") && tag != null) {
             if (title != null) {
                 Log.i("AppNotificationListener", String.format(">>> Vai responder pack[%s] title[%s], text[%s]", pack, title, text));
                 new ReplyIntentSender(sbn, context).recuperaRespostaAutomatica(title, text);

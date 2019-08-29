@@ -12,7 +12,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class ZelloClient extends AsyncTask<String, Void, List<String>> {
     private ReplyIntentSender replyIntentSender;
