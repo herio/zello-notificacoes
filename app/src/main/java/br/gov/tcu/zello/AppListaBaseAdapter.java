@@ -16,9 +16,9 @@ import java.util.ArrayList;
 public class AppListaBaseAdapter extends BaseAdapter implements View.OnClickListener {
 
     private Context context;
-    private ArrayList<NotificacaoBean> notificacaoBeanList;
+    private ArrayList<DtoNotificacao> notificacaoBeanList;
 
-    AppListaBaseAdapter(Context context, ArrayList<NotificacaoBean> notificacaoBeanList) {
+    AppListaBaseAdapter(Context context, ArrayList<DtoNotificacao> notificacaoBeanList) {
         this.context = context;
         this.notificacaoBeanList = notificacaoBeanList;
     }
@@ -50,7 +50,7 @@ public class AppListaBaseAdapter extends BaseAdapter implements View.OnClickList
         TextView txtPkg = rowView.findViewById(R.id.Itempkg);
         ImageView imageView = rowView.findViewById(R.id.icon);
 
-        NotificacaoBean m = notificacaoBeanList.get(position);
+        DtoNotificacao m = notificacaoBeanList.get(position);
         if (m != null) {
             txtTitle.setText(m.getTitle());
             txtText.setText(m.getText());

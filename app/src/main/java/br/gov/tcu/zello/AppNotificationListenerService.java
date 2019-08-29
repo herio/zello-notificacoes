@@ -47,7 +47,6 @@ public class AppNotificationListenerService extends NotificationListenerService 
         final String text = data == null ? "" : data.toString();
 
         Bitmap id = sbn.getNotification().largeIcon;
-        Log.i("NOTIFICATION-SBN", String.format(">>>>>>> sbn[%s]", sbn.toString()));
 
         Intent msgrcv = new Intent("Msg");
         msgrcv.putExtra("package", pack);
@@ -67,9 +66,9 @@ public class AppNotificationListenerService extends NotificationListenerService 
         if (pack.replaceAll("[^A-Za-z]+", "").toUpperCase().contains("WHATSAPP") && tag != null) {
             if (title != null) {
                 Log.i("AppNotificationListener", String.format(">>> Vai responder pack[%s] title[%s], text[%s]", pack, title, text));
-                new ReplyIntentSender(sbn, context).recuperaRespostaAutomatica(title, text);
+                new ZelloFachada(sbn, context).recuperaRespostaAutomatica(title, text);
             }
-            cancelNotification(sbn.getKey());
         }
+        cancelNotification(sbn.getKey());
     }
 }

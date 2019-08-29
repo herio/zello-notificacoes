@@ -6,16 +6,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 
-import java.util.List;
-
 import static android.app.RemoteInput.addResultsToIntent;
 
-class ReplyIntentSender {
+class ZelloFachada {
     private StatusBarNotification sbn;
+    private String destinatario;
     private Context context;
 
-    ReplyIntentSender(StatusBarNotification sbn, Context context) {
+    ZelloFachada(StatusBarNotification sbn, Context context) {
         this.sbn = sbn;
+        this.destinatario =  sbn.getNotification().extras.getString("android.title");
         this.context = context;
     }
 
@@ -25,13 +25,13 @@ class ReplyIntentSender {
         }
     }
 
-    void recuperouRespostaAutomatica(List<String> respostas) {
-        if (respostas != null) {
-            Notification.Action action = findActionResponse(sbn);
+    void recuperouRespostaAutomatica(DtoRespostaZello dtoResposta) {
+        if (dtoResposta != null) {
+            Notification.Action action = findActionResponse(dtoResposta);
             if (action != null) {
                 android.app.RemoteInput rem = action.getRemoteInputs()[0];
 
-                for (String resposta: respostas) {
+                for (String resposta: dtoResposta.getRespostas()) {
                     Intent intent = new Intent();
                     Bundle bundle = new Bundle();
                     bundle.putCharSequence(rem.getResultKey(), resposta);
@@ -46,13 +46,15 @@ class ReplyIntentSender {
         }
     }
 
-    private Notification.Action findActionResponse(StatusBarNotification sbn) {
-        Notification.Action[] actions = sbn.getNotification().actions;
-        if (actions != null) {
-            for (Notification.Action act : actions) {
-                String resp = act.title.toString().replaceAll("[^A-Za-z]+", "").toUpperCase();
-                if (resp.contains("RESP") || resp.contains("REPLY")) {
-                    return act;
+    private Notification.Action findActionResponse(DtoRespostaZello dtoResposta) {
+        if(destinatario.equals(dtoResposta.getDestinatario())) {
+            Notification.Action[] actions = sbn.getNotification().actions;
+            if (actions != null) {
+                for (Notification.Action act : actions) {
+                    String resp = act.title.toString().replaceAll("[^A-Za-z]+", "").toUpperCase();
+                    if (resp.contains("RESP") || resp.contains("REPLY")) {
+                        return act;
+                    }
                 }
             }
         }

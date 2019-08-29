@@ -13,15 +13,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ZelloClient extends AsyncTask<String, Void, List<String>> {
-    private ReplyIntentSender replyIntentSender;
+public class ZelloClient extends AsyncTask<String, Void, DtoRespostaZello> {
+    private ZelloFachada replyIntentSender;
 
-    ZelloClient(ReplyIntentSender replyIntentSender) {
+    ZelloClient(ZelloFachada replyIntentSender) {
         this.replyIntentSender = replyIntentSender;
     }
 
     @Override
-    protected List<String> doInBackground(String... params) {
+    protected DtoRespostaZello doInBackground(String... params) {
         Log.i("ZelloClient", String.format("### doInBackground params0[%s] params1[%s]", params[0], params[1]));
         HttpURLConnection urlConnection = null;
         try {
@@ -37,15 +37,20 @@ public class ZelloClient extends AsyncTask<String, Void, List<String>> {
 
             InputStream inputStream = urlConnection.getInputStream();
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readTree(inputStream).get("text");
+            JsonNode jsonNode = mapper.readTree(inputStream);
+            JsonNode textNode = jsonNode.get("text");
+            JsonNode destinatarioNode = jsonNode.get("recipient_id");
 
-            if (jsonNode.isArray()) {
-                for (final JsonNode objNode : jsonNode) {
+            if (textNode.isArray()) {
+                for (final JsonNode objNode : textNode) {
                     list.add(objNode.textValue());
                 }
             }
 
-            return list;
+            DtoRespostaZello dtoResposta = new DtoRespostaZello();
+            dtoResposta.setRespostas(list);
+            dtoResposta.setDestinatario(destinatarioNode.textValue());
+            return dtoResposta;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -67,9 +72,9 @@ public class ZelloClient extends AsyncTask<String, Void, List<String>> {
     }
 
     @Override
-    protected void onPostExecute(List<String> resposta) {
+    protected void onPostExecute(DtoRespostaZello dtoResposta) {
         if (replyIntentSender != null) {
-            replyIntentSender.recuperouRespostaAutomatica(resposta);
+            replyIntentSender.recuperouRespostaAutomatica(dtoResposta);
         }
     }
 }

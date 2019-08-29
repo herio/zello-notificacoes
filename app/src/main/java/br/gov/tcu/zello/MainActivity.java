@@ -20,7 +20,7 @@ public class MainActivity extends Activity {
 
     private ListView list;
     private AppListaBaseAdapter adapter;
-    private ArrayList<NotificacaoBean> notificacaoBeanList;
+    private ArrayList<DtoNotificacao> notificacaoBeanList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,10 +63,10 @@ public class MainActivity extends Activity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-
             final String title = intent.getStringExtra("title");
             final String pack = intent.getStringExtra("package");
             final String text = intent.getStringExtra("text");
+
 
             try {
                 byte[] byteArray = intent.getByteArrayExtra("icon");
@@ -74,7 +74,7 @@ public class MainActivity extends Activity {
                 if (byteArray != null) {
                     bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
                 }
-                NotificacaoBean notificacaoBean = new NotificacaoBean();
+                DtoNotificacao notificacaoBean = new DtoNotificacao();
                 notificacaoBean.setTitle(title);
                 notificacaoBean.setText(text);
                 notificacaoBean.setPkg(pack);

@@ -2,7 +2,7 @@ package br.gov.tcu.zello;
 
 import android.graphics.Bitmap;
 
-class NotificacaoBean {
+class DtoNotificacao {
     private String title;
     private String text;
     private String pkg;
