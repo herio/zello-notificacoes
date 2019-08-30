@@ -29,9 +29,14 @@ public class ZelloClient extends AsyncTask<String, Void, DtoRespostaZello> {
             URL url = new URL("https://chatbot.apps.tcu.gov.br/rasa/webhooks/whatsapp/webhook");
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("POST");
+            urlConnection.setRequestProperty("Content-Type", "application/json; utf-8");
+            urlConnection.setRequestProperty("Accept", "application/json");
+            urlConnection.setDoOutput(true);
+
             JSONObject jsonParam = new JSONObject();
             jsonParam.put("sender", params[0]);
             jsonParam.put("message", params[1]);
+
             setPostRequestContent(urlConnection, jsonParam);
             urlConnection.connect();
 

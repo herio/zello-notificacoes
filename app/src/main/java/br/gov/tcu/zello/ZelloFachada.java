@@ -15,7 +15,7 @@ class ZelloFachada {
 
     ZelloFachada(StatusBarNotification sbn, Context context) {
         this.sbn = sbn;
-        this.destinatario =  sbn.getNotification().extras.getString("android.title");
+        this.destinatario = sbn.getNotification().extras.getString("android.title");
         this.context = context;
     }
 
@@ -26,35 +26,40 @@ class ZelloFachada {
     }
 
     void recuperouRespostaAutomatica(DtoRespostaZello dtoResposta) {
-        if (dtoResposta != null) {
-            Notification.Action action = findActionResponse(dtoResposta);
+        try {
+            Notification.Action action = findActionResponse();
             if (action != null) {
+                Intent intent;
+                Bundle bundle;
                 android.app.RemoteInput rem = action.getRemoteInputs()[0];
-
-                for (String resposta: dtoResposta.getRespostas()) {
-                    Intent intent = new Intent();
-                    Bundle bundle = new Bundle();
-                    bundle.putCharSequence(rem.getResultKey(), resposta);
-                    addResultsToIntent(action.getRemoteInputs(), intent, bundle);
-                    try {
+                if (dtoResposta != null && destinatario.equals(dtoResposta.getDestinatario())) {
+                    for (String resposta : dtoResposta.getRespostas()) {
+                        intent = new Intent();
+                        bundle = new Bundle();
+                        bundle.putCharSequence(rem.getResultKey(), resposta);
+                        addResultsToIntent(action.getRemoteInputs(), intent, bundle);
                         action.actionIntent.send(context, 0, intent);
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
+                } else {
+                    intent = new Intent();
+                    bundle = new Bundle();
+                    bundle.putCharSequence(rem.getResultKey(), "Desculpa! Serviço indisponível \uD83D\uDE1F. Por favor, tente novamente em breve.");
+                    addResultsToIntent(action.getRemoteInputs(), intent, bundle);
+                    action.actionIntent.send(context, 0, intent);
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private Notification.Action findActionResponse(DtoRespostaZello dtoResposta) {
-        if(destinatario.equals(dtoResposta.getDestinatario())) {
-            Notification.Action[] actions = sbn.getNotification().actions;
-            if (actions != null) {
-                for (Notification.Action act : actions) {
-                    String resp = act.title.toString().replaceAll("[^A-Za-z]+", "").toUpperCase();
-                    if (resp.contains("RESP") || resp.contains("REPLY")) {
-                        return act;
-                    }
+    private Notification.Action findActionResponse() {
+        Notification.Action[] actions = sbn.getNotification().actions;
+        if (actions != null) {
+            for (Notification.Action act : actions) {
+                String resp = act.title.toString().replaceAll("[^A-Za-z]+", "").toUpperCase();
+                if (resp.contains("RESP") || resp.contains("REPLY")) {
+                    return act;
                 }
             }
         }

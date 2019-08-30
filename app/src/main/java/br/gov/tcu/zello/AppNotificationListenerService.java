@@ -10,6 +10,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 
 public class AppNotificationListenerService extends NotificationListenerService {
@@ -31,6 +34,8 @@ public class AppNotificationListenerService extends NotificationListenerService 
     public void onNotificationPosted(final StatusBarNotification sbn) {
         String pack = sbn.getPackageName();
         String tag = sbn.getTag();
+        long time = sbn.getNotification().when;
+
         Bundle extras = sbn.getNotification().extras;
 
         String title = extras.getString("android.title");
@@ -61,9 +66,10 @@ public class AppNotificationListenerService extends NotificationListenerService 
             byte[] byteArray = stream.toByteArray();
             msgrcv.putExtra("icon", byteArray);
         }
+
         LocalBroadcastManager.getInstance(context).sendBroadcast(msgrcv);
 
-        if (pack.replaceAll("[^A-Za-z]+", "").toUpperCase().contains("WHATSAPP") && tag != null) {
+        if (pack.replaceAll("[^A-Za-z]+", "").toUpperCase().contains("WHATSAPP") && tag != null && valida_time(time)) {
             if (title != null) {
                 Log.i("AppNotificationListener", String.format(">>> Vai responder pack[%s] title[%s], text[%s]", pack, title, text));
                 new ZelloFachada(sbn, context).recuperaRespostaAutomatica(title, text);
@@ -71,4 +77,11 @@ public class AppNotificationListenerService extends NotificationListenerService 
         }
         cancelNotification(sbn.getKey());
     }
+
+    private boolean valida_time(long time) {
+        Date hora_acrescimo = new Date(time + 300000);
+        Date atual = new Date();
+        return !(atual.after(hora_acrescimo));
+    }
+
 }
