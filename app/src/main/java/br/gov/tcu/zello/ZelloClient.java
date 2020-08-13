@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ZelloClient extends AsyncTask<String, Void, DtoRespostaZello> {
-    private ZelloFachada replyIntentSender;
+
+    private final ZelloFachada replyIntentSender;
 
     ZelloClient(ZelloFachada replyIntentSender) {
         this.replyIntentSender = replyIntentSender;
@@ -39,6 +40,8 @@ public class ZelloClient extends AsyncTask<String, Void, DtoRespostaZello> {
 
             setPostRequestContent(urlConnection, jsonParam);
             urlConnection.connect();
+            urlConnection.setConnectTimeout(120000);
+
 
             InputStream inputStream = urlConnection.getInputStream();
             ObjectMapper mapper = new ObjectMapper();
